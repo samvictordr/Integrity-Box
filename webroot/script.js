@@ -1,5 +1,5 @@
-const MODDIR = "/data/adb/modules/zygisk/webroot/common_scripts";
-const PROP = `/data/adb/modules/zygisk/module.prop`;
+const MODDIR = `/data/adb/modules/playintegrity/webroot/common_scripts`;
+const PROP = `/data/adb/modules/playintegrity/module.prop`;
 let modalBackdrop = document.getElementById("modal-backdrop");
 let modalTitle = document.getElementById("modal-title");
 let modalOutput = document.getElementById("modal-output");
@@ -146,39 +146,6 @@ async function updateDashboard() {
   }
 }
 
-function buildIntroSubtext() {
-  const el = document.getElementById("intro-subtext");
-  if (!el) return;
-  const quotes = ["Welcome Back","Let's Go","Stay Ready","Good Day","Trust Yourself","Break Limits","Breathe Fire","Sacrifice Comfort","Accept Everything","Fear Nothing","Grow Daily","Dream Relentlessly","Think Deep","Be Nothing","Truth Remains","Die-Awake, Not-Afraid","Think Clear","Face Fear","Pain Teaches","Break Chains","Level Up"];
-  const randomQuote = quotes[Math.floor(Math.random()*quotes.length)];
-  const words = randomQuote.split(" ");
-  el.innerHTML = "";
-  words.forEach((w,i) => {
-    const s = document.createElement("span");
-    s.textContent = w;
-    s.style.opacity = 0;
-    s.style.display = "block";
-    s.style.fontWeight = "bold";
-    s.style.fontSize = "4.5rem";
-    s.style.textAlign = "center";
-    s.style.transition = "opacity 0.3s ease-in-out";
-    s.style.animation = `fadeInWord 0.4s ease forwards ${i * 0.5}s`;
-    el.appendChild(s);
-  });
-}
-
-function typeIntroText(text) {
-  const el = document.querySelector(".intro-text");
-  if (!el) return;
-  el.textContent = "";
-  let i = 0;
-  const t = setInterval(() => {
-    el.textContent += text.charAt(i) || "";
-    i++;
-    if (i >= text.length) clearInterval(t);
-  }, 40);
-}
-
 async function _loadLangModule(lang) {
   try {
     const mod = await import(`./lang/${lang}.js`);
@@ -274,46 +241,23 @@ async function changeLanguage(lang) {
 }
 
 const SCRIPT_POPUPS = {
-  "kill.sh": { start: "Process Killed Successfully", success: "Process Killed Successfully", type: "info" },
-  "xiaomi.sh": { start: "Meow", success: "Meow", type: "info" },
-  "derpfest.sh": { start: "Meow", success: "Meow", type: "info" },
-  "helluva.sh": { start: "Meow", success: "Meow", type: "info" },
-  "pixelos.sh": { start: "Meow", success: "Meow", type: "info" },
-  "vending.sh": { start: "Open playstore & Check/FIX", success: "Open playstore & Check/FIX", type: "info" },  
-  "user.sh": { start: "I've added all user apps", success: "I've added all user apps", type: "info" },
-  "systemuser.sh": { start: "I've added all apps", success: "I've added all apps", type: "info" },
-  "sus.sh": { start: "Make it SUS🥷", success: "Make it SUS🥷", type: "info" },
-  "stop.sh": { start: "Switched to Blacklist Mode", success: "Switched to Blacklist Mode", type: "info" },
-  "start.sh": { start: "Switched to Whitelist Mode", success: "Switched to Whitelist Mode", type: "info" },
-  "spoof.sh": { start: "Done! Click again to revert changes", success: "Done! Click again to revert changes", type: "info" },
-  "setprop.sh": { start: "Switched back to default settings", success: "Switched back to default settings", type: "info" },
-  "resize.sh": { start: "Done! Click again to revert changes", success: "Done! Click again to revert changes", type: "info" },
-  "resetprop.sh": { start: "Done, Reopen detector to check", success: "Done, Reopen detector to check", type: "info" },
-  "report.sh": { start: "Contacting Developer", success: "Contacting Developer", type: "info" },
-  "prop.sh": { start: "Prop Dump Completed", success: "Prop Dump Completed", type: "info" },
-  "piffork": { start: "All changes will be applied immediately", success: "All changes will be applied immediately", type: "info" },
-  "pif.sh": { start: "Done!", success: "Done!", type: "info" },
-  "patch.sh": { start: "Done! Click again to revert changes", success: "Done! Click again to revert changes", type: "info" },
-  "module_info.sh": { start: "Read it properly", success: "Read it properly", type: "info" },
-  "modal.sh": { start: "Done! Click again to revert changes", success: "Done! Click again to revert changes", type: "info" },
-  "keybox.sh": { start: "Okay Buddy", success: "Okay Buddy", type: "info" },
-  "key.sh": { start: "Keybox has been updated✅", success: "Keybox has been updated✅", type: "info" },
-  "issue.sh": { start: "Report your problem here", success: "Report your problem here", type: "info" },
-  "info.sh": { start: "Redirecting to Source Code repo", success: "Redirecting to Source Code repo", type: "info" },
-  "banned.sh": { start: "Redirecting to Google Revoked List", success: "Redirecting to Google Revoked List", type: "info" },
-  "app.sh": { start: "Detection Complete", success: "Detection Complete", type: "info" },
-  "aosp.sh": { start: "Switched to AOSP keybox", success: "Switched to AOSP keybox", type: "info" },
-  "abnormal.sh": { start: "Detection Complete!", success: "Detection Complete!", type: "info" },
-  "meowverse.sh": { start: "REDIRECTING TO TELEGRAM", success: "Redirected to Telegram", type: "info" },
-  "meowdump.sh": { start: "Redirecting To Telegram", success: "Redirected to Telegram", type: "info" },
-  "support": { start: "Become a Supporter", success: "Become a Supporter", type: "info" },
-  "selinux.sh": { start: "SELinux Status Changed", success: "SELinux Status Changed", type: "info" },
-  "boot_hash.sh": { start: "Paste it here", success: "Boot hash operation complete", type: "success" },
-  "game.sh": { start: "LAUNCHING GAME", success: "Game launched", type: "info" },
-  "font.sh": { start: "Re-Open WebUI to apply changes", success: "Re-Open WebUI to apply changes", type: "info" },
-  "intro.sh": { start: "Re-Open WebUI to apply changes", success: "Re-Open WebUI to apply changes", type: "info" },
-  "webui.sh": { start: "Re-Open WebUI to apply changes", success: "Re-Open WebUI to apply changes", type: "info" },
-  "mona": { start: "Changes will be applied on reboot", success: "Changes will be applied on reboot", type: "info" }
+  "kill.sh": { success: "Process Killed Successfully", type: "info" },
+  "vending.sh": { success: "Open playstore & Check/FIX", type: "info" },  
+  "user.sh": { success: "I've added all user apps", type: "info" },
+  "sus.sh": { start: " ", success: "Make it SUS🥷", type: "info" },
+  "stop.sh": { success: "Switched to Blacklist Mode", type: "info" },
+  "start.sh": { success: "Switched to Whitelist Mode", type: "info" },
+  "spoof.sh": { success: "Applied", type: "info" },
+  "resetprop.sh": { success: "Done, Reopen detector to check", type: "info" },
+  "piffork": { start: "All changes will be applied immediately", type: "info" },
+  "pif.sh": { success: "Done!", type: "info" },
+  "patch.sh": { success: "Patch Status : ✅ Spoofed", type: "info" },
+  "key.sh": { success: "Keybox has been updated✅", type: "info" },
+  "issue.sh": { success: "Report your problem here", type: "info" },
+  "app.sh": { start: " ", success: "Detection Complete", type: "info" },
+  "meowdump.sh": { success: "Redirected to Telegram", type: "info" },
+  "support": { start: "Become a Supporter", type: "info" },
+  "boot_hash.sh": { success: "Boot hash operation complete", type: "success" }
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -324,29 +268,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   modalContent = document.getElementById("modal-content");
   await getModuleName();
   await updateDashboard();
-  const sparkleContainer = document.querySelector('.sparkle-container');
-  if (sparkleContainer) {
-    sparkleContainer.innerHTML = "";
-    for (let i = 0; i < 40; i++) {
-      const s = document.createElement("div");
-      s.classList.add("sparkle");
-      s.style.top = `${Math.random() * 100}%`;
-      s.style.left = `${Math.random() * 100}%`;
-      s.style.animationDelay = `${Math.random() * 3}s`;
-      sparkleContainer.appendChild(s);
-    }
-  }
-  buildIntroSubtext();
-  const introTextEl = document.querySelector('.intro-text');
-  if (introTextEl) {
-    const nameEl = document.getElementById("module-name");
-    const baseText = (nameEl && nameEl.textContent.trim()) || "Integrity-Box";
-    typeIntroText(baseText);
-  }
-  setTimeout(() => {
-    const ov = document.getElementById("intro-overlay");
-    if (ov) ov.remove();
-  }, 1500);
 
   document.querySelectorAll(".btn").forEach((btn) => {
     if (btn._handlerAttached) return;
@@ -403,19 +324,6 @@ document.addEventListener("DOMContentLoaded", async () => {
               }
             });
           }, 80);
-        } else if (type === "game") {
-          const gf = document.createElement("iframe");
-          gf.src = "./game/index.html";
-          gf.style.border = "none";
-          gf.style.width = "100%";
-          gf.style.height = "100%";
-          gf.style.flex = "1";
-          gf.style.borderRadius = "0";
-          openModal("", "", true);
-          modalOutput.innerHTML = "";
-          modalOutput.appendChild(gf);
-          popup(mapping.start, mapping.type);
-          return;
         } else if (type === "piffork") {
           const gf = document.createElement("iframe");
           gf.src = "./PlayIntegrityFork/index.html";
