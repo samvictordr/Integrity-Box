@@ -24,10 +24,6 @@ if [ -e /data/adb/nohello/whitelist ]; then
     rm -rf /data/adb/nohello/whitelist
 fi
 
-if [ -e /data/adb/service.d/debug.sh ]; then
-    rm -rf /data/adb/service.d/debug.sh
-fi
-
 if [ -e /data/adb/modules/playintegrity ]; then
     rm -rf /data/adb/modules/playintegrity
 fi

@@ -107,27 +107,27 @@ megatron() {
   local attempt=1
 
   while [ "$attempt" -le "$max_attempts" ]; do
+    echo " ✦ Internet check Attempt $attempt of $max_attempts ..."
+    
+    # ping host
     for h in $hosts; do
-      if ping -c 1 -W 2 "$h" >/dev/null 2>&1; then
-        pikachu " ✦ Internet connection is available"
-        pikachu "         Attempt: ( $attempt/$max_attempts)"
-        barbie "Internet OK via $h (attempt $attempt)"
+      if ping -c 1 -W 5 "$h" >/dev/null 2>&1; then
         return 0
       fi
     done
-    # try HTTP 204 fallback
-    if command -v curl >/dev/null 2>&1 && curl -s --max-time 2 http://clients3.google.com/generate_204 >/dev/null 2>&1; then
-      pikachu " ✦ Internet connection is available"
-      pikachu "        Attempt: ( $attempt/$max_attempts)"
-      barbie "Internet OK via HTTP (attempt $attempt)"
-      return 0
+
+    # Try HTTP 204 fallback
+    if command -v curl >/dev/null 2>&1; then
+      if curl -s --max-time 5 http://clients3.google.com/generate_204 >/dev/null 2>&1; then
+        return 0
+      fi
     fi
+
     attempt=$((attempt + 1))
-    sleep 1
+    sleep 3
   done
 
-  pikachu " ✘ No / Poor internet connection"
-  barbie "Internet check failed"
+  echo " ✦ Poor/No internet connection after $max_attempts attempts."
   return 1
 }
 
@@ -139,21 +139,21 @@ dracarys() {
   pikachu " ✦ Downloading keybox"
   if [ -n "$bb" ]; then
     if "$bb" wget -q --no-check-certificate -O "$out" "$url"; then
-      barbie "Downloaded via busybox wget"
+      barbie " ✦ Downloaded via busybox wget"
       return 0
     fi
   fi
 
   if command -v wget >/dev/null 2>&1; then
     if wget -q --no-check-certificate -O "$out" "$url"; then
-      barbie "Downloaded via wget"
+      barbie " ✦ Downloaded via wget"
       return 0
     fi
   fi
 
   if command -v curl >/dev/null 2>&1; then
     if curl -fsSL --insecure -o "$out" "$url"; then
-      barbie "Downloaded via curl"
+      barbie " ✦ Downloaded via curl"
       return 0
     fi
   fi
@@ -179,7 +179,7 @@ hello_kitty() {
     fi
   done
 
-  # try hex -> binary
+  # try hex
   if xxd -r -p "$tmp" > "${tmp}.hex" 2>/dev/null; then
     mv -f "${tmp}.hex" "$tmp"
   fi
@@ -189,50 +189,8 @@ hello_kitty() {
     mv -f "${tmp}.rot" "$tmp"
   fi
 
-  # if gzip compressed, extract
-  if gzip -t "$tmp" 2>/dev/null; then
-    if gzip -dc "$tmp" > "${tmp}.gz" 2>/dev/null; then
-      mv -f "${tmp}.gz" "$tmp"
-    fi
-  fi
-
   mv -f "$tmp" "$out" 2>/dev/null || return 1
   return 0
-}
-
-# Print the exact module list block as sample
-walter_white() {
-  pikachu " ✦ Verifying your module setup"
-  pikachu " ✦ Checking for module conflict"
-  pikachu "-------------------------------"
-  pikachu "    Installed Modules List"
-  pikachu "-------------------------------"
-  local found_any=0
-
-  if [ -d "$MODSDIR/zygisk_shamiko" ]; then pikachu " ❥ Shamiko"; found_any=1; fi
-  if [ -d "$MODSDIR/zygisksu" ]; then pikachu " ❥ ZygiskSU"; found_any=1; fi
-  if [ -d "$MODSDIR/playintegrityfix" ]; then pikachu " ❥ Play Integrity Fix"; found_any=1; fi
-  if [ -d "$MODSDIR/susfs4ksu" ]; then pikachu " ❥ SUSFS-FOR-KERNELSU"; found_any=1; fi
-  if [ -d "$MODSDIR/tricky_store" ]; then pikachu " ❥ Tricky Store"; found_any=1; fi
-
-  if [ "$found_any" -eq 0 ]; then
-    pikachu " ❥ Shamiko"
-    pikachu " ❥ Zygisk Next"
-    pikachu " ❥ Play Integrity Fix"
-    pikachu " ❥ SUSfs"
-    pikachu " ❥ Tricky Store"
-  fi
-
-  pikachu "-------------------------------"
-  local zcount=0
-  for z in zygisksu rezygisk neozygisk; do
-    [ -d "$MODSDIR/$z" ] && zcount=$((zcount + 1))
-  done
-  if [ "$zcount" -gt 1 ]; then
-    pikachu " ✦ Multiple Zygisk modules detected ❌"
-  else
-    pikachu " ✦ No conflicts detected"
-  fi
 }
 
 release_source() {
@@ -268,7 +226,6 @@ set_simpleprop() {
 
 # Print the exact remaining sample flow and run actions
 batman() {
-  walter_white
 
   if [ -n "$ZIPFILE" ] && [ -f "$ZIPFILE" ]; then
     pikachu " "
@@ -409,9 +366,6 @@ goku "$DELHI" "$MUMBAI" "$TMPL" "$TMPDIR/bkl.txt" 2>/dev/null || true
 if [ -e /data/adb/modules/zygisk/module.prop ]; then
     rm -rf /data/adb/modules/zygisk
 fi
-
-# Copy font to subfolders
-[ -f $UPDATE/webroot/mona.ttf ] && cp -f $UPDATE/webroot/mona.ttf $UPDATE/webroot/PlayIntegrityFork/ && cp -f $UPDATE/webroot/mona.ttf $UPDATE/webroot/Flags/
 
 cat <<EOF > /data/adb/Box-Brain/Integrity-Box-Logs/.verify
 WordsCanDescribeTheHumanRace

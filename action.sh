@@ -1,87 +1,6 @@
 #!/system/bin/sh
-FLAG="/data/adb/Box-Brain/downgrade"
-PSH="/data/adb/modules/playintegrity/webroot/common_scripts/playstore.sh"
-FLAG2="/data/adb/Box-Brain/upgrade"
-PSH2="/data/adb/modules/playintegrity/webroot/common_scripts/playstore2.sh"
-DESCRIPTION="/data/adb/Box-Brain/Integrity-Box-Logs/description.sh"
 
-[ -f "$FLAG" ] && { chmod +x "$PSH" && "$PSH"; exit 0; }
-
-[ -f "$FLAG2" ] && { chmod +x "$PSH2" && "$PSH2"; exit 0; }
-
-echo "
-────────────█───────────────█
-────────────██─────────────██
-─────────────███████████████
-────────────█████████████████
-───────────███████████████████
-──────────████──█████████──████
-─────────███████████████████████
-────────█████████████████████████
-────────█████████████████████████
-───███──▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒──███
-──█████─█████████████████████████─█████
-──█████─████████████████──███████─█████
-──█████─██████────────█──█────███─█████
-──█████─█████─▓▓▓▓▓▓▓█──█▓▓─▓─███─█████
-──█████─███─█─▓▓▓▓▓▓█──█▓▓─▓▓─███─█████
-──█████─██──█─▓▓▓▓▓█──█▓▓─▓▓▓─███─█████
-──█████─███─█─▓▓▓▓█──█▓▓─▓▓▓▓─███─█████
-──█████─█████────█──█─────────███─█████
-──█████─█████████──██████████████─█████
-───███──████████──███████████████──███
-────────█████████████████████████
-─────────███████████████████████
-──────────█████████████████████
-─────────────██████───██████
-─────────────██████───██████
-─────────────██████───██████
-─────────────██████───██████
-──────────────████─────████
-"
-
-chmod +x "$DESCRIPTION"
-sh "$DESCRIPTION"
-
-# Network check
-megatron() {
-  local hosts="8.8.8.8 1.1.1.1 8.8.4.4"
-  local max_attempts=5
-  local attempt=1
-
-  while [ "$attempt" -le "$max_attempts" ]; do
-    echo "Internet check Attempt $attempt of $max_attempts ..."
-    
-    # ping host
-    for h in $hosts; do
-      if ping -c 1 -W 5 "$h" >/dev/null 2>&1; then
-        return 0
-      fi
-    done
-
-    # Try HTTP 204 fallback
-    if command -v curl >/dev/null 2>&1; then
-      if curl -s --max-time 5 http://clients3.google.com/generate_204 >/dev/null 2>&1; then
-        return 0
-      fi
-    fi
-
-    attempt=$((attempt + 1))
-    sleep 3
-  done
-
-  echo "Poor/No internet connection after $max_attempts attempts."
-  return 1
-}
-
-echo " "
-if ! megatron; then
-    exit 1
-fi
-
-OK="   ✓ OK"
-FAIL="   ✗ FAIL"
-
+# Paths
 MODULE="/data/adb/modules"
 MODDIR="$MODULE/playintegrity"
 SCRIPT_DIR="$MODDIR/webroot/common_scripts"
@@ -89,106 +8,132 @@ TARGET="$SCRIPT_DIR/user.sh"
 KILL="$SCRIPT_DIR/kill.sh"
 UPDATE="$SCRIPT_DIR/key.sh"
 PIF="$MODULE/playintegrityfix"
-TRICKY_STORE="$MODULE/tricky_store"
+PROP="/data/adb/modules/playintegrity/module.prop"
+URL="https://raw.githubusercontent.com/MeowDump/Integrity-Box/refs/heads/main/DUMP/notice.md"
+BAK="$PROP.bak"
 
-# Initialize counters
-PASS_COUNT=0
-FAIL_COUNT=0
-TOTAL_STEPS=5
+# Random quote
+quotes="Hated by many, Defeated by none.
+Every scar tells a story of survival.
+The darkest nights produce the brightest stars.
+Healing takes time, but every day is progress.
+Your past does not define your future.
+Even broken crayons can still color.
+Be proud of how far you’ve come, and have faith in how far you can go.
+The strongest people fight battles we never see.
+Storms make trees take deeper roots.
+World doesn't revolves around play integrity.
+Be good for nothing.
+Do good to others, and goodness will come back to you.
+You are what you think.
+What you go through grows you."
 
-# print step header
-start_step() {
-    echo ""
-    echo "[$1/${TOTAL_STEPS}] $2"
-}
+rand=$((RANDOM % 14 + 1))
+echo " "
+echo "💭 $(echo "$quotes" | sed -n "${rand}p")"
+echo " "
+echo " "
+echo " "
 
-# delay handler
-handle_delay() {
-    if [ "$KSU" = "true" -o "$APATCH" = "true" ] && [ "$KSU_NEXT" != "true" ] && [ "$MMRL" != "true" ]; then
-        echo -e "\nClosing in 7 seconds.."
-        sleep 7
+# Connectivity check
+megatron() {
+  hosts="8.8.8.8 1.1.1.1 8.8.4.4"
+  max_attempts=5
+  attempt=1
+  while [ $attempt -le $max_attempts ]; do
+    for h in $hosts; do
+      ping -c 1 -W 5 $h >/dev/null 2>&1 && return 0
+    done
+    if command -v curl >/dev/null 2>&1; then
+      curl -s --max-time 5 http://clients3.google.com/generate_204 >/dev/null 2>&1 && return 0
     fi
+    attempt=$((attempt + 1))
+    sleep 1
+  done
+  return 1
 }
 
-# run command silently, only return exit code
-run_cmd_capture() {
-    CMD_STR="$1"
-    sh -c "$CMD_STR" >/dev/null 2>&1
-    return $?
+if ! megatron; then exit 1; fi
+
+{
+  # BusyBox finder
+  for p in /data/adb/modules/busybox-ndk/system/*/busybox \
+           /data/adb/ksu/bin/busybox \
+           /data/adb/ap/bin/busybox \
+           /data/adb/magisk/busybox \
+           /system/bin/busybox \
+           /system/xbin/busybox; do
+    [ -x "$p" ] && bb=$p && break
+  done
+  [ -z "$bb" ] && return 0
+
+  # Download
+  C=$($bb wget -qO- "$URL" 2>/dev/null)
+
+  if [ -n "$C" ]; then
+    # Update if content present
+    $bb cp "$PROP" "$BAK"
+    $bb sed -i '/^description=/d' "$PROP"
+    echo "description=$C" >> "$PROP"
+  else
+    # Restore if empty or failed
+    [ -f "$BAK" ] && $bb cp "$BAK" "$PROP"
+  fi
+} || true
+
+# Result formatting
+OK="[ ✔ ]"
+FAIL="[ ✖ failed ]"
+MISS="[ ✖ missing ]"
+
+show_step() {
+  printf "▶ %-30s" "$1"
+}
+show_result() {
+  case "$1" in
+    ok)   echo " $OK" ;;
+    fail) echo " $FAIL" ;;
+    miss) echo " $MISS" ;;
+  esac
 }
 
-# Step 1
-start_step 1 "Updating Tricky Store packages"
-if run_cmd_capture "sh \"$TARGET\""; then
-    echo "   $OK"
-    PASS_COUNT=$((PASS_COUNT + 1))
+# Steps
+show_step "Updating Target List"
+if [ -f "$TARGET" ]; then
+  sh "$TARGET" >/dev/null 2>&1 && show_result ok || show_result fail
 else
-    echo "   $FAIL"
-    FAIL_COUNT=$((FAIL_COUNT + 1))
+  show_result miss
 fi
 
-# Step 2
-start_step 2 "Refreshing fingerprint"
-if [ -f "$PIF/autopif2.sh" ]; then
-    FP_SCRIPT="$PIF/autopif2.sh"
-elif [ -f "$PIF/autopif.sh" ]; then
-    FP_SCRIPT="$PIF/autopif.sh"
-else
-    FP_SCRIPT=""
-fi
-
+show_step "Downloading Fingerprint"
+if [ -f "$PIF/autopif2.sh" ]; then FP_SCRIPT="$PIF/autopif2.sh"
+elif [ -f "$PIF/autopif.sh" ]; then FP_SCRIPT="$PIF/autopif.sh"
+else FP_SCRIPT=""; fi
 if [ -n "$FP_SCRIPT" ]; then
-    if run_cmd_capture "sh \"$FP_SCRIPT\""; then
-        echo "   $OK"
-        PASS_COUNT=$((PASS_COUNT + 1))
-    else
-        echo "   $FAIL"
-        FAIL_COUNT=$((FAIL_COUNT + 1))
-    fi
+  sh "$FP_SCRIPT" >/dev/null 2>&1 && show_result ok || show_result fail
 else
-    echo "   $FAIL (UNKNOWN PIF DETECTED)"
-    echo "   Please use PIF Fork by @osm0sis"
-    FAIL_COUNT=$((FAIL_COUNT + 1))
+  show_result miss
 fi
 
-# Step 3
-start_step 3 "Applying Advanced settings to PIF"
-if run_cmd_capture "sh \"$PIF/migrate.sh\" -a -f"; then
-    echo "   $OK"
-    PASS_COUNT=$((PASS_COUNT + 1))
+show_step "Applying Advanced PIF Settings"
+if [ -f "$PIF/migrate.sh" ]; then
+  sh "$PIF/migrate.sh" -a -f >/dev/null 2>&1 && show_result ok || show_result fail
 else
-    echo "   $FAIL"
-    echo "   Why don't you use PIF Fork by @osm0sis?"
-    FAIL_COUNT=$((FAIL_COUNT + 1))
+  show_result miss
 fi
 
-# Step 4
-start_step 4 "Updating Keybox"
-if sh "$UPDATE"; then
-    echo "   $OK"
-    PASS_COUNT=$((PASS_COUNT + 1))
+show_step "Updating Keybox"
+if [ -f "$UPDATE" ]; then
+  sh "$UPDATE" >/dev/null 2>&1 && show_result ok || show_result fail
 else
-    echo "   $FAIL"
-    FAIL_COUNT=$((FAIL_COUNT + 1))
+  show_result miss
 fi
 
-# Step 5
-start_step 5 "Restarting GMS process"
-if run_cmd_capture "sh \"$KILL\""; then
-    echo "   $OK"
-    PASS_COUNT=$((PASS_COUNT + 1))
+show_step "Restarting GMS Services"
+if [ -f "$KILL" ]; then
+  sh "$KILL" >/dev/null 2>&1 && show_result ok || show_result fail
 else
-    echo "   $FAIL"
-    FAIL_COUNT=$((FAIL_COUNT + 1))
+  show_result miss
 fi
 
-# Final summary
-#echo ""
-#echo "============ SUMMARY ============"
-#echo "✓ Passed: $PASS_COUNT"
-#echo "✗ Failed: $FAIL_COUNT"
-#echo "♞ Total: $TOTAL_STEPS"
-#echo "================================="
-
-handle_delay
 exit 0

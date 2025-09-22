@@ -131,6 +131,10 @@ if [ -f "$NODEBUG_FLAG" ] || [ -f "$TAG_FLAG" ]; then
     fi
 fi
 
+if [ -e "/data/adb/Box-Brain/target" ]; then
+    /data/adb/modules/playintegrity/webroot/common_scripts/user.sh
+fi
+
 # Disable Play Store update components 
 [ -f /data/adb/Box-Brain/smash ] || exit 0
 
