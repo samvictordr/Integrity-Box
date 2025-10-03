@@ -1,10 +1,5 @@
 #!/system/bin/sh
 
-#LOCKFILE="/data/local/tmp/integrity_box.lock"
-#[ -f "$LOCKFILE" ] && echo " ✦ Script already running. Exiting" >&2 && exit 99
-#trap 'rm -f "$LOCKFILE"' EXIT
-#touch "$LOCKFILE"
-
 # Paths & config
 mkdir -p "/data/local/tmp"
 A="/data/adb"
@@ -36,26 +31,6 @@ P() {
            /data/adb/ap/bin/busybox \
            /data/adb/magisk/busybox; do
     [ -x "$Q" ] && echo "$Q" && return
-  done
-}
-
-# Network check 
-check_network() {
-  ATTEMPT=1
-  MAX_ATTEMPTS=10
-  while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
-    if ping -c1 -W1 8.8.8.8 >/dev/null 2>&1; then
-      log " ✦ Network connectivity confirmed on attempt $ATTEMPT"
-      return 0
-    else
-      log " ✦ Network connectivity attempt $ATTEMPT failed"
-      if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
-        log " ✦ Network unreachable after $MAX_ATTEMPTS attempts"
-        return 1
-      fi
-      ATTEMPT=$((ATTEMPT + 1))
-      sleep 1
-    fi
   done
 }
 
@@ -122,15 +97,9 @@ touch "$D"
 BB=$(P)
 log " ✦ Busybox path: $BB"
 
-# Network connectivity check 
-if ! check_network; then
-  log " ✦ Network check failed, exiting"
-  exit 1
-fi
-
 # Check verification file presence
 if [ ! -s "$N" ]; then
-  log " ✦ Verification file missing, please re-flash module"
+  log " ✦ Verification failed, please re-flash module"
   exit 20
 fi
 log " ✦ Verification file present"
