@@ -14,29 +14,27 @@
   
 > This module offers the following features:  
 
+-  Spoofs LineageOS props detection
+-  Spoofs debug fingerprint detection
+-  Fixes abnormal boot hash
+-  Hides PIF Hook detection
+-  Spoofs build tag
+-  Spoofs storage encryption
+-  Spoofs SE Linux status
+-  Spoofs custom recovery detection
 -  Updates valid `keybox.xml`  
 -  Updates `target.txt` as per your TEE status
--  Hides debug fingerprint detection
--  Hides debug build detection
--  Re-freshes target list on every reboot for seamless exprience
--  Switch Shamiko & Nohello modes (via module toggle)
--  Guides users if their module setup is incorrect to pass play integrity
--  Adds all custom ROM detection packages in the **SusFS path**  
+-  Re-freshes fingerprint on every reboot for seamless exprience
+-  Switch Shamiko & Nohello modes
 -  Disables EU injector by default  
--  Disables GMS ROM spoofing for  various cROMs 
--  Spoofs encryption status   
+-  Disables GMS ROM spoofing for various cROMs 
 -  Spoofs ROM release key  
--  Spoofs SE Linux status
--  Updates PIF Fingerprint
--  Spoofs PIF Injection Values
+-  Can set custom Fingerprints
 -  Spoofs Tricky Store's Security Patch
--  Switches between AOSP & Valid keybox
--  FIXES Device not certified error
--  Shows banned keybox list
--  Set's verified boot hash via SusFs
--  Detects abnormal activity to help debug issues
+-  Fixes Device not certified error
+-  Kills GMS Vending process
 -  Detects flagged & spoofed apps
--  More feature are there, check [WebUI](https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/webui.gif)
+### NOTE: Every single feature is customisable, you can choose what to use and what to skip as per your requirements
 </details>
 
 <details>
@@ -69,20 +67,10 @@
 <details>
 <summary><strong>Why No Commit Messages?</strong></summary>
 
-I don’t write code directly on GitHub, I use Notepad locally and upload the files here for transparency. Since GitHub adds a default message like "Added files via upload", I usually leave the commit message blank to keep things clean. tbh idc
-
-The commits themselves are still visible, and you can always compare the changes anytime.
+I don’t write code directly on GitHub. I use Notepad locally and upload the files when they’re ready, for transpirancy. If you’re expecting handcrafted commit messages or spotless diffs, you’ve confused this repo with a museum exhibit. I focus on getting things done, not polishing every line for spectators. The commits are visible, and you can compare changes anytime. There’s even a [changelog](https://raw.githubusercontent.com/MeowDump/MeowDump/refs/heads/main/playintegrity/changelog.md), for those brave enough to read. If that’s still too much effort, feel free to rewrite the commit messages and send a pull request. Otherwise, Save the drama and look elsewhere
 
 ![Commit](https://raw.githubusercontent.com/MeowDump/Integrity-Box/refs/heads/main/DUMP/commit.gif)
-<!-- 
-<br/>
 
-<img 
-  src="https://raw.githubusercontent.com/MeowDump/Integrity-Box/main/DUMP/commit.gif" 
-  alt="Commit GIF" 
-  width="400"
-/>
--->
 </details>
 
 <details>
@@ -99,7 +87,7 @@ The commits themselves are still visible, and you can always compare the changes
 
 <div align="center">
   <a href="https://github.com/MeowDump/Integrity-Box/releases" target="_blank">
-    <img src="DUMP/download2.png" alt="Download Button" width="600" />
+    <img src="DUMP/download.png" alt="Download Button" width="600" />
   </a>
 </div>
 
