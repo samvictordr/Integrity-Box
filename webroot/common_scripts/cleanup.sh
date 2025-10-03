@@ -6,7 +6,7 @@ BOX2="$MODSDIR/integrity_box"
 F="/data/adb/tricky_store/keybox.xml"
 T="/data/adb/tricky_store/keybox.xml.tmp"
 L="/data/adb/Box-Brain/Integrity-Box-Logs/remove.log"
-X="bhojpuri,gaana,pasand,haiii,hehe"
+X="every,soul,will,taste,death"
 
 log() {
     echo "- $1" >> "$L"
@@ -27,22 +27,6 @@ touch "$L"
     echo "••••••• Cleanup Started •••••••"
 
 [ -f /data/adb/modules/playintegrity/webroot/IntegrityBox.png ] && touch /data/adb/Box-Brain/noredirect
-
-if [ -e /data/adb/modules/integrity_box/.tamper.log ]; then
-    chattr -i /data/adb/modules/integrity_box/.tamper.log
-fi
-
-if [ -e /data/adb/modules/integrity_box/hello.sh ]; then
-    chattr -i /data/adb/modules/integrity_box/hello.sh
-fi
-
-if [ -e /data/adb/modules/integrity_box/module.prop ]; then
-    chattr -i /data/adb/modules/integrity_box/module.prop
-fi
-
-if [ -e /data/adb/modules/integrity_box/uninstall.sh ]; then
-    chattr -i /data/adb/modules/integrity_box/uninstall.sh
-fi
 
 # Remove meow helper
 if pm list packages | grep -q "meow.helper"; then
@@ -96,33 +80,20 @@ printf "%s\n" "$Y" > "$T"
 mv "$T" "$F"
 
     log "Deleting known leftover files from my modules..."
-    delete_if_exist /data/adb/Integrity-Box/openssl
-    delete_if_exist /data/adb/Integrity-Box/libssl.so.3
-    delete_if_exist /data/adb/modules/Integrity-Box/system/bin/openssl
-    delete_if_exist /data/local/tmp/keybox_downloader
-    delete_if_exist /data/adb/modules_update/integrity_box/keybox_downloader.sh
-    delete_if_exist /data/adb/modules_update/integrity_box/Toaster.apk
     delete_if_exist /data/adb/integrity_box_verify
     delete_if_exist /data/adb/modules/AntiBloat/system/product/app/MeowAssistant/MeowAssistant.apk
     delete_if_exist /data/adb/modules/PixelLauncher/system/product/app/MeowAssistant/MeowAssistant.apk
     delete_if_exist /data/adb/modules/PowerSaverPro/system/product/app/PowerSaverPro/PowerSaverPro.apk
-	delete_if_exist /data/adb/modules/integrity_box/system/product/app/Toaster/Toaster.apk
 	delete_if_exist /data/adb/modules_update/playintegrity/verify.sh
 	delete_if_exist /data/adb/Integrity-Box-Logs
-    delete_if_exist /data/adb/Box-Brain/debug
 	delete_if_exist /data/adb/modules_update/playintegrity/meow
 	delete_if_exist /data/adb/modules_update/playintegrity/credits.md
-	delete_if_exist /data/adb/modules/playintegrityfix/custom.pif.json.backup
-	delete_if_exist /data/adb/modules_update/playintegrity/disable.sh
-	delete_if_exist /data/adb/Box-Brain/Integrity-Box-Logs/hello.sh
 	delete_if_exist /data/adb/modules/integrity_box
-	delete_if_exist /data/adb/Box-Brain/Integrity-Box-Logs/hello.sh
 	delete_if_exist /data/adb/modules/IntegrityBox
 	delete_if_exist /data/adb/modules/zygisk
 	delete_if_exist /data/adb/service.d/debug.sh
 	delete_if_exist /data/adb/Box-Brain/Integrity-Box-Logs/description.sh
 	delete_if_exist /data/adb/modules/playintegrity/tmp.prop
-
     echo "••••••• Cleanup Ended •••••••"
     echo ""
 } >> "$L" 2>&1

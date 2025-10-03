@@ -25,16 +25,10 @@ if [ ! -f "$FILE_PATH" ] && [ ! -d "$TARGET_DIR" ]; then
     exit 0
 fi
 
-# Toggle spoofing
-#if [ -f "$FILE_PATH" ]; then
-#    rm -f "$FILE_PATH"
-#    log "Patch Status : ❌ Not Spoofed / Removed"
-#else
-    mkdir -p "$TARGET_DIR"
-    touch "$TARGET_DIR/security_patch.txt"
-    echo "$FILE_CONTENT" > "$FILE_PATH"
-    log "Patch Status : ✅ Spoofed"
-#fi
+mkdir -p "$TARGET_DIR"
+touch "$TARGET_DIR/security_patch.txt"
+echo "$FILE_CONTENT" > "$FILE_PATH"
+log "Patch Status : ✅ Spoofed"
 
 log "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 log " "

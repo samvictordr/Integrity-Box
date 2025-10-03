@@ -66,6 +66,8 @@ done
 
 if [ -n "$FOUND_APPS" ]; then
     log "   └─ ⚠️ Found risky packages:\n$FOUND_APPS"
+    log " "
+    log "🪵 TIP: Use H.M.A to hide them"
 fi
 
 if [ -n "$SPOOFED_APPS" ]; then
@@ -78,8 +80,6 @@ fi
 
 log "$Q"
 log "- Detection Complete!\n"
-log " "
-log "🪵 TIP: Use H.M.A to hide them"
 log " "
 echo -e "$R" >> "$L"
 log "Log saved to $L"

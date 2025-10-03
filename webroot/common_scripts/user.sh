@@ -55,9 +55,7 @@ add_pkg() {
 
 # Builder
 echo "# Last updated on $(date '+%A %d/%m/%Y %I:%M:%S%p')" > "$TMP" || exit 1
-echo "#" >> "$TMP"
 
-add_pkg "android"
 add_pkg "com.android.vending"
 add_pkg "com.google.android.gms"
 add_pkg "com.reveny.nativecheck"
@@ -68,6 +66,7 @@ add_pkg "icu.nullptr.nativetest"
 add_pkg "com.google.android.contactkeys"
 add_pkg "com.google.android.ims"
 add_pkg "com.google.android.safetycore"
+add_pkg "com.google.android.apps.walletnfcrel"
 
 # Append installed packages; avoid dupes
 pm list packages -3 2>/dev/null | cut -d ":" -f 2 | while read -r pkg; do
