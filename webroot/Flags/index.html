@@ -77,6 +77,7 @@ body.dark hr{border-top:1px solid rgba(255,255,255,.06)}
   </div>
 
   <div class="row"><div class="left"><span class="material-icons">android</span><div class="label">Spoof Lineage Props</div></div><label class="switch"><input type="checkbox" id="NoLineageProp"><span class="slider"><span class="knob"></span></span></label></div>
+  <div class="row"><div class="left"><span class="material-icons">android</span><div class="label">Override Lineage Props</div></div><label class="switch"><input type="checkbox" id="override"><span class="slider"><span class="knob"></span></span></label></div>
   <div class="row"><div class="left"><span class="material-icons">bug_report</span><div class="label">Debug Fingerprint</div></div><label class="switch"><input type="checkbox" id="nodebug"><span class="slider"><span class="knob"></span></span></label></div>
   <div class="row"><div class="left"><span class="material-icons">pest_control</span><div class="label">Debug Build</div></div><label class="switch"><input type="checkbox" id="build"><span class="slider"><span class="knob"></span></span></label></div>
   <div class="row"><div class="left"><span class="material-icons">verified</span><div class="label">Build Tag</div></div><label class="switch"><input type="checkbox" id="tag"><span class="slider"><span class="knob"></span></span></label></div>
@@ -96,13 +97,14 @@ body.dark hr{border-top:1px solid rgba(255,255,255,.06)}
 
 <script>
 const DIR="/data/adb/Box-Brain";
-const FILES=["noredirect","advanced","NoLineageProp","target","nodebug","encrypt","twrp","pif","build","tag","selinux"];
+const FILES=["noredirect","advanced","override","NoLineageProp","target","nodebug","encrypt","twrp","pif","build","tag","selinux"];
 const els=Object.fromEntries(FILES.map(f=>[f,document.getElementById(f)]));
 const popup=document.getElementById("popup");
 
 const messages={
   "noredirect":{on:"You won't be redirected to release source",off:"Redirect enabled"},
   "NoLineageProp":{on:"Disable me if camera doesn't work",off:"Lineage props won't be hidded"},
+  "override":{on:"Use this feature only if necessary",off:"lineage props won't be force hidded"},
   "target":{on:"target.txt will be updated automatically on boot",off:"target.txt won't be updated automatically on boot"},
   "pif":{on:"pif.json will be updated automatically on boot",off:"pif.json won't be updated automatically on boot"},
   "twrp":{on:"Reboot to apply changes",off:"Turned OFF"},
