@@ -1,7 +1,7 @@
 #!/system/bin/sh
 
 UPDATE="/data/adb/modules_update/playintegrity"
-HASHFILE="$UPDATE/meow"
+HASHFILE="$UPDATE/hash"
 
 # Check if hash file exists
 if [ ! -f "$HASHFILE" ]; then

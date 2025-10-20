@@ -2,8 +2,7 @@
 MODDIR=${0%/*}
 LOG_DIR="/data/adb/Box-Brain/Integrity-Box-Logs"
 INSTALL_LOG="$LOG_DIR/Installation.log"
-UPDATE="/data/adb/modules_update/playintegrity"
-SCRIPT="$UPDATE/webroot/common_scripts"
+SCRIPT="$MODPATH/webroot/common_scripts"
 PIF_DIR="/data/adb/modules/playintegrityfix"
 PIF_PROP="$PIF_DIR/module.prop"
 
@@ -111,8 +110,8 @@ batman() {
     log " "
     log " ✦ Checking Module Integrity..."
 
-    if [ -f "$UPDATE/verify.sh" ]; then
-      if sh "$UPDATE/verify.sh"; then
+    if [ -f "$MODPATH/verify.sh" ]; then
+      if sh "$MODPATH/verify.sh"; then
         log " ✦ Verification completed successfully"
       else
         log " ✘ Verification failed"
@@ -213,11 +212,9 @@ else
     log " ✦ File already exists, skipping"
 fi
 
-#Create flag
-touch /data/adb/Box-Brain/advanced
-
-# Force stop Playstore 
+# Force stop Playstore & force action to use advanced settings
 am force-stop com.android.vending
+touch "/data/adb/Box-Brain/advanced"
 
 release_source
 log " "

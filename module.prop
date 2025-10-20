@@ -1,9 +1,9 @@
 id=playintegrity
 name=.𝙄𝙣𝙩𝙚𝙜𝙧𝙞𝙩𝙮 𝘽𝙤𝙭 📦
-version=v23
-versionCode=23000
+version=v24
+versionCode=24000
 author=𝗠𝗘𝗢𝗪𝗻𝗮 💅 || tg@MeowDump
 description=A toolkit for managing Play Integrity & System Environment
 updateJson=https://raw.githubusercontent.com/MeowDump/MeowDump/refs/heads/main/playintegrity/release.json
 support=https://t.me/MeowDump
-banner=
+banner=https://raw.githubusercontent.com/MeowDump/MeowDump/refs/heads/main/Banner/mona1.png

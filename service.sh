@@ -1,12 +1,13 @@
 #!/system/bin/sh
+
 # Module path and file references
 LOG_DIR="/data/adb/Box-Brain/Integrity-Box-Logs"
 PROP="/data/adb/modules/playintegrity/system.prop"
 LINE="ro.crypto.state=encrypted"
-PIF="$MODULE/playintegrityfix"
+PIF="/data/adb/modules/playintegrityfix"
 LOG="$LOG_DIR/service.log"
 LOG2="$LOG_DIR/encrypt.log"
-LOG3="$LOGDIR/autopif.log"
+LOG3="$LOG_DIR/autopif.log"
 LOG4="$LOG_DIR/twrp.log"
 
 # Log folder
@@ -27,10 +28,6 @@ if [ -f /data/adb/Box-Brain/selinux ]; then
         fi
     fi
 fi
-
-sleep 69
-# Update description
-sh /data/adb/Box-Brain/Integrity-Box-Logs/description.sh
 
 # Module install path
 export MODPATH="/data/adb/modules/playintegrity"
@@ -147,7 +144,7 @@ fi
       echo "Line already exists, no action needed"
     else
       echo "$LINE" >> "$PROP"
-      echo "Added line: $LINE"
+      echo "Spoofed prop: $LINE"
     fi
   else
     if grep -qxF "$LINE" "$PROP"; then
@@ -163,21 +160,47 @@ fi
 
 # Rename twrp folder to avoid root detection
 {
-  echo "TWRP RENAME ($(date))"
-
-  if [ -f /data/adb/Box-Brain/twrp ] && [ -d /sdcard/TWRP ]; then
-    if [ -z "$(ls -A /sdcard/TWRP)" ]; then
-      rm -rf /sdcard/TWRP
-      echo "Deleted empty /sdcard/TWRP"
-    else
-      TARGET="/sdcard/renamed-recovery-folder-$(date +%Y%m%d-%H%M%S)"
-      mv /sdcard/TWRP "$TARGET"
-      echo "Renamed non-empty /sdcard/TWRP → $TARGET"
-    fi
-  else
-    echo "Marker missing or /sdcard/TWRP not found ❌"
-  fi
+  echo "TWRP/FOX RENAME ($(date))"
   echo
+
+  rename_recovery_folder() {
+    local MARKER="$1"
+    local FOLDER="$2"
+    local ALT="$3"
+    local NAME="$4"
+
+    # Resolve accessible folder path
+    if [ -d "$FOLDER" ]; then
+      PATH_TO_USE="$FOLDER"
+    elif [ -d "$ALT" ]; then
+      PATH_TO_USE="$ALT"
+    else
+      echo " $NAME folder not found at $FOLDER or $ALT"
+      return
+    fi
+
+    # Verify marker
+    if [ ! -f "$MARKER" ]; then
+      echo " FLAG $MARKER missing for $NAME  skipping"
+      return
+    fi
+
+    # Rename or delete
+    if [ -z "$(ls -A "$PATH_TO_USE")" ]; then
+      rm -rf "$PATH_TO_USE"
+      echo " Deleted empty $PATH_TO_USE"
+    else
+      TARGET="/sdcard/renamed-${NAME,,}-folder-$(date +%Y%m%d-%H%M%S)"
+      mv "$PATH_TO_USE" "$TARGET"
+      echo " Renamed non-empty $PATH_TO_USE → $TARGET"
+    fi
+    echo
+  }
+
+  # Run for both TWRP and Fox
+  rename_recovery_folder "/data/adb/Box-Brain/twrp" "/sdcard/TWRP" "/storage/emulated/0/TWRP" "TWRP"
+  rename_recovery_folder "/data/adb/Box-Brain/fox" "/sdcard/Fox" "/storage/emulated/0/Fox" "Fox"
+
 } >> "$LOG4" 2>&1
 
 # Download PIF fingerprint on boot (will fail automatically wen no internet xD)
@@ -186,23 +209,39 @@ fi
   echo "Timestamp: $(date)"
   echo "Checking prerequisite: /data/adb/Box-Brain/pif"
 
-  if [ -f /data/adb/Box-Brain/pif ]; then
-    echo "detected PIF on boot"
+  PIF="/data/adb/Box-Brain/pif"
+
+  if [ -f "$PIF" ]; then
+    echo "Detected PIF on boot"
     sleep 69
 
+    run_temp_exec() {
+      local script="$1"
+      if [ ! -r "$script" ]; then
+        echo "Script $script not readable ❌"
+        return 1
+      fi
+      local orig_mode
+      orig_mode=$(stat -c "%a" "$script")
+      echo "Original permission: $orig_mode"
+      chmod +x "$script"
+      echo "Temporary +x granted, executing..."
+      "$script"
+      echo "Execution finished, reverting permission"
+      chmod "$orig_mode" "$script"
+    }
+
     if [ -f "$PIF/autopif2.sh" ]; then
-      echo "Executing autopif2.sh..."
-      sh "$PIF/autopif2.sh"
-      echo "autopif2.sh finished"
+      echo "Found autopif2.sh"
+      run_temp_exec "$PIF/autopif2.sh"
     elif [ -f "$PIF/autopif.sh" ]; then
-      echo "Executing autopif.sh..."
-      sh "$PIF/autopif.sh"
-      echo "autopif.sh finished"
+      echo "Found autopif.sh"
+      run_temp_exec "$PIF/autopif.sh"
     else
       echo "No autopif2.sh or autopif.sh found ❌"
     fi
   else
-    echo "Hide TWRP toggle is disabled"
+    echo "PIF on boot toggle is disabled"
   fi
 
   echo "========================================"
