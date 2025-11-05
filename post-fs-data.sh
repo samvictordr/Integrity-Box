@@ -1,7 +1,10 @@
 #!/system/bin/sh
+MODPATH="${0%/*}"
+. $MODPATH/common_func.sh
+
 boot="/data/adb/service.d"
 placeholder="/data/adb/modules/playintegrity/webroot/common_scripts"
-
+PLAYSTORE="/data/adb/Box-Brain/playstore"
 mkdir -p "$boot"
 
 # Remove installation script if exists 
@@ -18,6 +21,13 @@ fi
 touch "$placeholder/meowdump"
 touch "$placeholder/boot_hash"
 touch "$placeholder/vending"
+touch "$placeholder/support"
+touch "$placeholder/app.sh"
+touch "$placeholder/user.sh"
+touch "$placeholder/patch.sh"
+touch "$placeholder/pif.sh"
+touch "$placeholder/resetprop.sh"
+touch "$placeholder/kill.sh"
 touch "$placeholder/report"
 touch "$placeholder/start"
 touch "$placeholder/stop"
@@ -101,7 +111,9 @@ done < "$PROP_FILE"
 echo "[INFO] Script completed at $(date)" >> "$LOG_FILE"
 echo "•••••••••••••••••••••=" >> "$LOG_FILE"
 echo " "
-echo " Checking Again for Lineage Props"
+echo " "
+echo " LINEAGE PROPS AFTER OVERRIDE:"
+echo " "
 getprop | grep -i lineage
 touch "/data/adb/Box-Brain/.los"
 exit 0
@@ -113,6 +125,7 @@ chmod 755 "$placeholder/override_lineage.sh"
 if [ ! -f "$boot/hash.sh" ]; then
   cat <<'EOF' > "$boot/hash.sh"
 #!/system/bin/sh
+
 HASH_FILE="/data/adb/Box-Brain/hash.txt"
 LOG_DIR="/data/adb/Box-Brain/Integrity-Box-Logs"
 LOG_FILE="$LOG_DIR/vbmeta.log"
@@ -187,5 +200,95 @@ exit 0
 EOF
 fi
 
-chmod 755 "$boot/hash.sh"
+chmod 777 "$boot/hash.sh"
+
+if [ ! -f "$boot/prop.sh" ]; then
+  cat <<'EOF' > "$boot/prop.sh"
+#!/system/bin/sh
+writelog() {
+    echo "$(date +'%Y-%m-%d %H:%M:%S') - $1" | tee -a "$LOG_FILE"
+    /system/bin/log -t PATCH_OVERRIDE "$1"
+}
+
+# Function to check and set property if needed
+check_and_set_prop() {
+    local PROP=$1
+    local VALUE=$2
+
+    local CURRENT
+    CURRENT=$(getprop "$PROP")
+
+    if [ "$CURRENT" = "$VALUE" ]; then
+        writelog " $PROP is already set to $VALUE : no change needed"
+    else
+        if resetprop "$PROP" "$VALUE"; then
+            writelog " Set $PROP to $VALUE (was: $CURRENT)"
+        else
+            writelog " Failed to set $PROP (current: $CURRENT)"
+        fi
+    fi
+}
+
+# Log file
+LOG_FILE="/data/adb/Box-Brain/Integrity-Box-Logs/prop_patch.log"
+
+writelog "•••••• Overriding Security Patch ••••••"
+
+# Desired patch level
+PATCH_DATE="2025-10-05"
+FILE_PATH="/data/adb/tricky_store/security_patch.txt"
+
+mkdir -p "/data/adb/tricky_store"
+echo "all=$PATCH_DATE" > "$FILE_PATH" 2>>"$LOG_FILE"
+
+# Check if resetprop exists
+if ! command -v resetprop >/dev/null 2>&1; then
+    writelog " resetprop not found"
+    exit 1
+fi
+
+# Apply only if needed
+check_and_set_prop ro.build.version.security_patch "$PATCH_DATE"
+check_and_set_prop ro.vendor.build.security_patch "$PATCH_DATE"
+
+# Final verification
+BUILD_VAL=$(getprop ro.build.version.security_patch)
+VENDOR_VAL=$(getprop ro.vendor.build.security_patch)
+
+if [ "$BUILD_VAL" = "$PATCH_DATE" ] && [ "$VENDOR_VAL" = "$PATCH_DATE" ]; then
+    writelog " Both security patch props are correctly set to $PATCH_DATE"
+else
+    writelog " Final verification failed: one or both props are incorrect"
+fi
+
+writelog "•••••• Script finished ••••••"
+exit 0
+EOF
+fi
+
+chmod 777 "$boot/prop.sh"
+
+if [ -e "$PLAYSTORE" ]; then
+    echo "Disabling PixelPlaystore" >> /data/adb/Box-Brain/PixelStore.log
+    resetprop -n persist.sys.pixelprops.vending false
+else
+    echo "Playstore flag is disabled, no action needed" >> /data/adb/Box-Brain/PixelStore.log
+fi
+
+if [ -d "/data/adb/modules/playintegrityfix" ]; then
+    pif "PIF module detected, Script mode has been disabled"
+    pif " [ post-fs-data.sh ] "
+    exit 0
+fi
+
+# Add recommended process in denylist for better root hiding
+if [ -d "/data/adb/magisk" ]; then
+    add_if_missing com.google.android.gms
+    add_if_missing com.google.android.gms com.google.android.gms.unstable
+    add_if_missing com.android.vending
+#    add_if_missing com.google.android.gsf
+#    add_if_missing com.google.android.gsf com.google.process.gapps
+#    add_if_missing com.google.android.gsf com.google.process.gservices
+fi
+
 exit 0
