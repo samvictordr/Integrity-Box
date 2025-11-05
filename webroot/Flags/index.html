@@ -2,92 +2,154 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Flag Control</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Control Centre</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <style>
-:root{--bg:#fff0f4;--fg:#111;--card:#fff;--muted:#6b7280;--shadow:rgba(0,0,0,.12);--track:#fff0f4;--on:#ec407a;--danger:#FF0E00;--info:#00bcd4}
-body.dark{--bg:#1c1c1e;--fg:#f5f5f7;--card:#2c2c2e;--muted:#a1a1aa;--shadow:rgba(0,0,0,.55);--track:#3a3a3c;--on:#f5d491}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"San Francisco",Arial,sans-serif;display:grid;place-items:center;min-height:0vh;transition:background .25s,color .25s}
-.card{width:305px;background:var(--card);border-radius:20px;box-shadow:0 12px 28px var(--shadow);padding:22px}
-.h{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.h .title{font-size:18px;font-weight:700}
-.row{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(0,0,0,.06)}
-body.dark .row{border-bottom:1px solid rgba(255,255,255,.06)}
-.left{display:flex;align-items:center;gap:10px}
-.icon{width:22px;height:22px;display:inline-block}
-.label{font-size:15px}
-.switch{position:relative;width:52px;height:32px}
+:root {
+  --bg-gradient: linear-gradient(145deg, #05060b, #001f3d);
+  --card:rgba(15,20,30,0.9);
+  --fg:#e6e6e6;
+  --accent:#1592ff;
+  --shadow:rgba(0,0,0,0.7);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;
+  background:var(--bg-gradient);
+  color:var(--fg);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  padding:20px 0;
+  overflow-y:auto;
+  scroll-behavior:smooth;
+}
+
+/* Card */
+.card{
+  background:var(--card);
+  border-radius:24px;
+  width:380px;
+  padding:28px;
+  box-shadow:0 12px 28px var(--shadow);
+  backdrop-filter:blur(10px);
+  animation:fadeIn 0.4s ease-out;
+}
+
+/* Header */
+.h{
+  display:flex;
+  justify-content:center;
+  margin-bottom:22px;
+  font-size:22px;
+  font-weight:700;
+  color:var(--accent);
+  text-shadow:0 0 6px rgba(21,146,255,0.5);
+}
+
+/* Rows */
+.row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:16px 0;
+  border-radius:14px;
+  position:relative;
+  margin-bottom:12px;
+  background:rgba(25,30,45,0.5);
+  transition:transform 0.2s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+.row::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  background:rgba(21,146,255,0.05);
+  filter:blur(10px);
+  z-index:0;
+}
+.row:hover{
+  transform:translateY(-2px);
+  box-shadow:0 0 14px rgba(21,146,255,0.3);
+  background:rgba(25,30,45,0.65);
+}
+
+/* Left section */
+.left{display:flex;align-items:center;gap:12px;position:relative;z-index:1}
+.icon{width:26px;height:26px;color:var(--accent)}
+.label{font-size:16px;color:var(--fg);font-weight:500}
+
+/* Switch toggle */
+.switch{
+  position:relative;width:56px;height:34px;cursor:pointer;z-index:1;
+}
 .switch input{opacity:0;width:0;height:0}
-.slider{position:absolute;inset:0;border-radius:34px;background:var(--track);transition:background .25s}
-.knob{position:absolute;left:3px;bottom:3px;width:26px;height:26px;border-radius:50%;background:#fff;transition:transform .25s}
-.switch input:checked + .slider{background:var(--on)}
-.switch input:checked + .slider .knob{transform:translateX(20px)}
-.theme{display:flex;align-items:center;gap:10px;margin-top:6px}
-hr{border:0;border-top:1px solid rgba(0,0,0,.06);margin:12px 0}
-body.dark hr{border-top:1px solid rgba(255,255,255,.06)}
+.slider{
+  position:absolute;inset:0;border-radius:34px;
+  background:#1a1f2b;transition:background .25s,box-shadow .25s;
+  overflow:hidden;
+}
+.knob{
+  position:absolute;left:4px;bottom:4px;width:26px;height:26px;border-radius:50%;
+  background:#fff;transition:transform .25s,background .25s;
+}
+.switch input:checked + .slider{
+  background:var(--accent);
+  box-shadow:0 0 16px var(--accent);
+}
+.switch input:checked + .slider .knob{transform:translateX(22px);}
+.slider::after{
+  content:"";
+  position:absolute;inset:0;border-radius:inherit;
+  opacity:0;transform:scale(1.2);background:var(--accent);
+}
+.switch:active .slider::after{animation:ripple .3s ease}
+@keyframes ripple{0%{opacity:.3;transform:scale(0.8)}100%{opacity:0;transform:scale(1.8)}}
 
 /* Popup */
-.popup {
-  position: fixed;
-  top: 0px;
-  left: 50%;
-  transform: translateX(-50%) translateY(-10px);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--card);
-  color: var(--fg);
-  padding: 10px 16px;
-  border-radius: 18px;
-  box-shadow: 0 6px 18px var(--shadow);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .4s ease, transform .4s ease;
-  z-index: 999;
-  white-space: nowrap;
-  font-size: 14px;
-  font-weight: 500;
+.popup{
+  position:fixed;
+  top:10px;
+  left:50%;
+  transform:translateX(-50%) translateY(-10px);
+  display:flex;align-items:center;gap:8px;
+  background:var(--card);
+  color:var(--fg);
+  padding:12px 20px;
+  border-radius:20px;
+  box-shadow:0 8px 22px var(--shadow);
+  opacity:0;pointer-events:none;
+  transition:opacity .3s ease,transform .3s ease;
+  z-index:999;
+  font-size:15px;font-weight:500;
 }
-.popup .material-icons {
-  font-size: 18px;
-}
-.popup.show {
-  opacity: 1;
-  transform: translate(-50%, 0);
-}
-/* Color variations */
-.popup.success .material-icons { color: var(--on); }
-.popup.error .material-icons { color: var(--danger); }
-.popup.info .material-icons { color: var(--info); }
+.popup.show{opacity:1;transform:translate(-50%,0)}
+.popup.success .material-icons{color:var(--accent)}
+.popup.error .material-icons{color:#ff3366}
+.popup.info .material-icons{color:var(--accent)}
+
 </style>
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 </head>
 <body>
 <div class="card">
-  <div class="h">
-    <div class="title">Control Centre</div>
-    <div class="theme">
-      <span class="material-icons" aria-hidden="true">dark_mode</span>
-      <label class="switch">
-        <input type="checkbox" id="themeToggle" />
-        <span class="slider"><span class="knob"></span></span>
-      </label>
-    </div>
-  </div>
+  <div class="h">Control Centre</div>
 
-  <div class="row"><div class="left"><span class="material-icons">android</span><div class="label">Spoof Lineage Props</div></div><label class="switch"><input type="checkbox" id="NoLineageProp"><span class="slider"><span class="knob"></span></span></label></div>
-  <div class="row"><div class="left"><span class="material-icons">android</span><div class="label">Override Lineage Props</div></div><label class="switch"><input type="checkbox" id="override"><span class="slider"><span class="knob"></span></span></label></div>
-  <div class="row"><div class="left"><span class="material-icons">bug_report</span><div class="label">Debug Fingerprint</div></div><label class="switch"><input type="checkbox" id="nodebug"><span class="slider"><span class="knob"></span></span></label></div>
-  <div class="row"><div class="left"><span class="material-icons">pest_control</span><div class="label">Debug Build</div></div><label class="switch"><input type="checkbox" id="build"><span class="slider"><span class="knob"></span></span></label></div>
-  <div class="row"><div class="left"><span class="material-icons">verified</span><div class="label">Build Tag</div></div><label class="switch"><input type="checkbox" id="tag"><span class="slider"><span class="knob"></span></span></label></div>
-  <div class="row"><div class="left"><span class="material-icons">lock</span><div class="label">Storage Encryption</div></div><label class="switch"><input type="checkbox" id="encrypt"><span class="slider"><span class="knob"></span></span></label></div>
-  <div class="row"><div class="left"><span class="material-icons">bolt</span><div class="label">Selinux Status</div></div><label class="switch"><input type="checkbox" id="selinux"><span class="slider"><span class="knob"></span></span></label></div>
-  <div class="row"><div class="left"><span class="material-icons">healing</span><div class="label">TWRP detection</div></div><label class="switch"><input type="checkbox" id="twrp"><span class="slider"><span class="knob"></span></span></label></div>
-  <div class="row"><div class="left"><span class="material-icons">adb</span><div class="label">PIF Advanced</div></div><label class="switch"><input type="checkbox" id="advanced"><span class="slider"><span class="knob"></span></span></label></div>
-  <div class="row"><div class="left"><span class="material-icons">shop</span><div class="label">Pif.json on boot</div></div><label class="switch"><input type="checkbox" id="pif"><span class="slider"><span class="knob"></span></span></label></div>
-  <div class="row"><div class="left"><span class="material-icons">ads_click</span><div class="label">Target.txt on boot</div></div><label class="switch"><input type="checkbox" id="target"><span class="slider"><span class="knob"></span></span></label></div>
-  <div class="row"><div class="left"><span class="material-icons">do_not_touch</span><div class="label">No Redirect</div></div><label class="switch"><input type="checkbox" id="noredirect"><span class="slider"><span class="knob"></span></span></label></div>
+  <div class="row"><div class="left"><span class="material-icons icon">adb</span><div class="label">PIF Advanced</div></div><label class="switch"><input type="checkbox" id="advanced"><span class="slider"><span class="knob"></span></span></label></div>
+  <div class="row"><div class="left"><span class="material-icons icon">shop</span><div class="label">PlayStore Pixelify</div></div><label class="switch"><input type="checkbox" id="playstore"><span class="slider"><span class="knob"></span></span></label></div>
+  <div class="row"><div class="left"><span class="material-icons icon">android</span><div class="label">Spoof Lineage Props</div></div><label class="switch"><input type="checkbox" id="NoLineageProp"><span class="slider"><span class="knob"></span></span></label></div>
+  <div class="row"><div class="left"><span class="material-icons icon">android</span><div class="label">Override Lineage Props</div></div><label class="switch"><input type="checkbox" id="override"><span class="slider"><span class="knob"></span></span></label></div>
+  <div class="row"><div class="left"><span class="material-icons icon">bug_report</span><div class="label">Spoof Debug Fingerprint</div></div><label class="switch"><input type="checkbox" id="nodebug"><span class="slider"><span class="knob"></span></span></label></div>
+  <div class="row"><div class="left"><span class="material-icons icon">pest_control</span><div class="label">Spoof Debug Build</div></div><label class="switch"><input type="checkbox" id="build"><span class="slider"><span class="knob"></span></span></label></div>
+  <div class="row"><div class="left"><span class="material-icons icon">verified</span><div class="label">Spoof Build Tag</div></div><label class="switch"><input type="checkbox" id="tag"><span class="slider"><span class="knob"></span></span></label></div>
+  <div class="row"><div class="left"><span class="material-icons icon">lock</span><div class="label">Spoof Encryption</div></div><label class="switch"><input type="checkbox" id="encrypt"><span class="slider"><span class="knob"></span></span></label></div>
+  <div class="row"><div class="left"><span class="material-icons icon">bolt</span><div class="label">Spoof Selinux</div></div><label class="switch"><input type="checkbox" id="selinux"><span class="slider"><span class="knob"></span></span></label></div>
+  <div class="row"><div class="left"><span class="material-icons icon">healing</span><div class="label">Spoof Custom Recovery</div></div><label class="switch"><input type="checkbox" id="twrp"><span class="slider"><span class="knob"></span></span></label></div>
+  <div class="row"><div class="left"><span class="material-icons icon">shop</span><div class="label">Fetch FP on boot</div></div><label class="switch"><input type="checkbox" id="pif"><span class="slider"><span class="knob"></span></span></label></div>
+  <div class="row"><div class="left"><span class="material-icons icon">ads_click</span><div class="label">Update Target.txt on boot</div></div><label class="switch"><input type="checkbox" id="target"><span class="slider"><span class="knob"></span></span></label></div>
+  <div class="row"><div class="left"><span class="material-icons icon">do_not_touch</span><div class="label">No Redirect</div></div><label class="switch"><input type="checkbox" id="noredirect"><span class="slider"><span class="knob"></span></span></label></div>
 </div>
 
 <div class="popup" id="popup">
@@ -97,89 +159,46 @@ body.dark hr{border-top:1px solid rgba(255,255,255,.06)}
 
 <script>
 const DIR="/data/adb/Box-Brain";
-const FILES=["noredirect","advanced","override","NoLineageProp","target","nodebug","encrypt","twrp","pif","build","tag","selinux"];
+const FILES=["noredirect","advanced","playstore","override","NoLineageProp","target","nodebug","encrypt","twrp","pif","build","tag","selinux"];
 const els=Object.fromEntries(FILES.map(f=>[f,document.getElementById(f)]));
 const popup=document.getElementById("popup");
-
 const messages={
-  "noredirect":{on:"You won't be redirected to release source",off:"Redirect enabled"},
-  "NoLineageProp":{on:"Disable me if camera doesn't work",off:"Lineage props won't be hidded"},
-  "override":{on:"Use this feature only if necessary",off:"lineage props won't be force hidded"},
-  "target":{on:"target.txt will be updated automatically on boot",off:"target.txt won't be updated automatically on boot"},
-  "pif":{on:"pif.json will be updated automatically on boot",off:"pif.json won't be updated automatically on boot"},
-  "twrp":{on:"Reboot to apply changes",off:"Turned OFF"},
-  "encrypt":{on:"Storage fake encryption applied",off:"Fake encryption disabled"},
-  "nodebug":{on:"Debug fingerprint will be cleaned",off:"Debug fingerprint cleaning disabled"},
-  "build":{on:"Debug build will be cleaned",off:"Debug build cleaning disabled"},
-  "tag":{on:"Debug tag will be cleaned",off:"Debug tag cleaning disabled"},
-  "advanced":{on:"Advanced settings for PIF fork will be used",off:"Default settings for PIF fork will be used"},
-  "selinux":{on:"SELINUX will be spoofed to Enforcing on boot",off:"OK bro😉"}
+  noredirect:{on:"You won't be redirected",off:"Redirect enabled"},
+  NoLineageProp:{on:"Disable if camera fails",off:"Lineage props unchanged"},
+  playstore:{on:"Reboot to apply changes",off:"Do resetprop manually"},
+  override:{on:"Click on action button",off:"Force props disabled"},
+  target:{on:"target.txt updates on boot",off:"No auto-update"},
+  pif:{on:"pif.prop updates on boot",off:"No auto-update"},
+  twrp:{on:"Reboot to apply changes",off:"Disabled"},
+  encrypt:{on:"Fake storage encryption applied",off:"Disabled"},
+  nodebug:{on:"Reboot to apply changes",off:"Disabled"},
+  build:{on:"Reboot to apply changes",off:"Disabled"},
+  tag:{on:"Reboot to apply changes",off:"Disabled"},
+  advanced:{on:"Pro Mode enabled",off:"Default settings"},
+  selinux:{on:"Reboot to apply changes",off:"Disabled"}
 };
+const exec = typeof ksu!=='undefined'&&ksu&&ksu.exec?cmd=>ksu.exec(cmd):(typeof Android!=='undefined'&&Android&&Android.exec?cmd=>Android.exec(cmd):()=>'');
 
-function bridge(){
-  if(typeof ksu!=='undefined' && ksu && typeof ksu.exec==='function'){
-    return cmd => ksu.exec(cmd);
-  }
-  if(typeof Android!=='undefined' && Android && typeof Android.exec==='function'){
-    return cmd => Android.exec(cmd);
-  }
-  return ()=>"";
-}
-const exec=bridge();
-
-// Colored Popup Logic
 let popupTimeout;
-function showPopup(msg, type = "info", icon = "info") {
-  const textEl = document.getElementById("popupText");
-  const iconEl = document.getElementById("popupIcon");
-
-  // reset classes
-  popup.className = "popup";
-  if (["success","error","info"].includes(type)) popup.classList.add(type);
-
-  textEl.textContent = msg;
-  iconEl.textContent = icon;
-
+function showPopup(msg,type="info",icon="info"){
+  const textEl=document.getElementById("popupText");
+  const iconEl=document.getElementById("popupIcon");
+  popup.className="popup "+type;
+  textEl.textContent=msg;
+  iconEl.textContent=icon;
   popup.classList.add("show");
-  if (popupTimeout) clearTimeout(popupTimeout);
-  popupTimeout = setTimeout(() => {
-    popup.classList.remove("show");
-  }, 2000);
+  if(popupTimeout) clearTimeout(popupTimeout);
+  popupTimeout=setTimeout(()=>popup.classList.remove("show"),2000);
 }
 
 function toggleFile(f,enable){
-  if(enable){
-    exec(`touch "${DIR}/${f}"`);
-    showPopup(messages[f].on,"success","check_circle");
-  } else {
-    exec(`rm -f "${DIR}/${f}"`);
-    showPopup(messages[f].off,"error","block");
-  }
+  if(enable){ exec(`touch "${DIR}/${f}"`); showPopup(messages[f].on,"success","check_circle"); }
+  else{ exec(`rm -f "${DIR}/${f}"`); showPopup(messages[f].off,"error","block"); }
 }
 
-function loadState(){
-  FILES.forEach(f=>{
-    const out=exec(`[ -f "${DIR}/${f}" ] && echo 1 || echo 0`);
-    els[f].checked=(out.trim()==="1");
-  });
-}
-
-FILES.forEach(f=>{
-  els[f].addEventListener('change',()=>toggleFile(f,els[f].checked));
-});
-
-function initTheme(){
-  const s=localStorage.getItem('theme')||'light';
-  document.body.classList.toggle('dark',s==='dark');
-  themeToggle.checked=s==='dark';
-  themeToggle.addEventListener('change',()=>{
-    const dark=themeToggle.checked;
-    document.body.classList.toggle('dark',dark);
-    localStorage.setItem('theme',dark?'dark':'light');
-  });
-}
-
-window.addEventListener('DOMContentLoaded',()=>{initTheme();loadState();});
+function loadState(){ FILES.forEach(f=>{ els[f].checked=(exec(`[ -f "${DIR}/${f}" ] && echo 1 || echo 0`).trim()==="1"); }); }
+FILES.forEach(f=>{ els[f].addEventListener('change',()=>toggleFile(f,els[f].checked)); });
+window.addEventListener('DOMContentLoaded',loadState);
 </script>
 </body>
 </html>
