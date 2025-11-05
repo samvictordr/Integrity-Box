@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Applist Detector</title>
+<link rel="stylesheet" href="style.css">
+<style>
+:root {
+  --bg: #1f2233;
+  --fg: #e6e6e6;
+  --accent: #1592FF;
+  --panel-bg: #232637D9;
+  --btn-hover: #2d3240F2;
+  --card-border: #ffffff0D;
+  --shadow-color: #00000066;
+  --border-radius: 16px;
+  --status-enabled: rgba(0,153,255,0.2);
+  --status-disabled: rgba(220,80,80,0.25);
+  --status-spoofed: rgba(255,195,0,0.25);
+}
+
+body {
+  margin:0;
+  padding:2rem 0;
+  background:linear-gradient(135deg,#1f2233,#14172b);
+  color:var(--fg);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-height:100vh;
+}
+
+.title-bar{
+  text-align:center;
+  margin-bottom:1rem;
+}
+.title{
+  font-size:2.3rem;
+  font-weight:700;
+  color:var(--accent);
+  text-shadow:0 0 12px rgba(21,146,255,0.3);
+}
+.subtitle{
+  font-size:0.95rem;
+  opacity:0.75;
+  font-style:italic;
+  color:var(--fg);
+}
+
+.hud-card{
+  background: var(--panel-bg);
+  border:1px solid var(--card-border);
+  box-shadow:0 0 20px rgba(0,153,255,0.12);
+  border-radius: var(--border-radius);
+  padding:1.8rem;
+  width:80%;
+  max-width:700px;
+  display:flex;
+  flex-direction:column;
+  gap:1rem;
+}
+
+.hud-actions{
+  display:flex;
+  gap:1rem;
+  flex-wrap:wrap;
+}
+
+.hud-btn{
+  background:var(--panel-bg);
+  border:1px solid var(--card-border);
+  border-radius:var(--border-radius);
+  font-weight:600;
+  color:var(--fg);
+  padding:0.8rem 1.6rem;
+  cursor:pointer;
+  flex:1;
+  text-align:center;
+  transition: all 0.3s;
+}
+
+.hud-btn:hover{ background:var(--btn-hover); transform:scale(1.03); }
+
+.hud-log{
+  background: var(--panel-bg);
+  border-left:3px solid var(--accent);
+  padding:1rem;
+  font-size:0.9rem;
+  max-height:500px;
+  overflow-y:auto;
+  white-space: normal;
+  line-height:1.5;
+  border-radius: var(--border-radius);
+  display:flex;
+  flex-direction:column;
+  gap:0.5rem;
+  width:100%;
+  word-break: break-word;
+}
+
+.status-bubble{
+  padding:0.8rem 1rem;
+  border-radius: var(--border-radius);
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.3);
+}
+.status-name{font-weight:600;color:var(--fg);}
+.status-pkg{font-size:0.8rem;color:#aaa;}
+.status-indicator{
+  align-self:flex-start;
+  padding:2px 8px;
+  border-radius:12px;
+  font-size:0.75rem;
+  font-weight:600;
+}
+.status-indicator.risky{background: var(--status-disabled); color:#FF4C4C;}
+.status-indicator.spoofed{background: var(--status-spoofed); color:#FFC107;}
+.status-indicator.safe{background: var(--status-enabled); color:var(--accent);}
+
+.toast{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background: var(--panel-bg);
+  color: var(--fg);
+  padding:10px 20px;
+  border-radius:8px;
+  opacity:0;
+  transition: opacity 0.3s ease;
+  z-index:999;
+}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<div class="title-bar">
+  <div class="title">Applist Detector</div>
+  <div class="subtitle">Powered by Integrity Box</div>
+</div>
+
+<div class="hud-card">
+  <div class="hud-actions">
+    <div class="hud-btn" id="run-btn">Run Scan</div>
+    <div class="hud-btn" id="clear-log">Clear Log</div>
+  </div>
+  <div class="hud-log" id="output-log">Waiting for command...</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const runBtn = document.getElementById("run-btn");
+const clearBtn = document.getElementById("clear-log");
+const outputLog = document.getElementById("output-log");
+const toast = document.getElementById("toast");
+
+function showToast(msg){
+  toast.textContent = msg;
+  toast.classList.add("show");
+  setTimeout(()=>toast.classList.remove("show"),2500);
+}
+
+function addBubble(name,pkg,status){
+  const bubble=document.createElement("div");
+  bubble.className="status-bubble";
+  const statusClass = status==="RISKY"?"risky":status==="SPOOFED"?"spoofed":"safe";
+  bubble.innerHTML = `<div class="status-name">${name}</div>
+                      <div class="status-pkg">Package: ${pkg}</div>
+                      <div class="status-indicator ${statusClass}">${status}</div>`;
+  outputLog.appendChild(bubble);
+  outputLog.scrollTop = outputLog.scrollHeight;
+}
+
+async function safeRun(cmd, timeout=1000){
+  if(!window.parent.runShell) return "";
+  return Promise.race([
+    window.parent.runShell(cmd).catch(()=>""),
+    new Promise(res=>setTimeout(()=>res(""),timeout))
+  ]);
+}
+
+async function detectApps(){
+  outputLog.innerHTML="";
+  showToast("Scanning apps...");
+
+  const riskyApps = [
+    "com.rifsxd.ksunext:KernelSU_Next",
+    "me.weishu.kernelsu:KernelSU",
+    "com.google.android.hmal:Hide_My_Applist",
+    "com.reveny.vbmetafix.service:VBmeta_Fixer",
+    "me.twrp.twrpapp:TWRP",
+    "com.termux:Termux",
+    "bin.mt.plus:MT_Manager",
+    "org.swiftapps.swiftbackup:Swift_Backup",
+    "ru.mike.updatelocker:Update_Locker",
+    "com.coderstory.toolkit:Core_Patch",
+    "ru.maximoff.apktool:APK_ToolM",
+    "io.github.muntashirakon.AppManager.debug:App_Manager",
+    "io.github.a13e300.ksuwebui:KSU_WebUI",
+    "com.slash.batterychargelimit:Battery_Charging_Limit",
+    "io.github.vvb2060.keyattestation:Key_Attestation",
+    "io.github.qwq233.keyattestation:Key_Attestation",
+    "io.github.muntashirakon.AppManager:App_Manager",
+    "io.github.vvb2060.mahoshojo:Momo",
+    "com.reveny.nativecheck:Native_Detector",
+    "icu.nullptr.nativetest:NativeTest",
+    "io.github.huskydg.memorydetector:Memory_Detector",
+    "org.akanework.checker:Checker",
+    "icu.nullptr.applistdetector:Applist_Detector",
+    "io.github.rabehx.securify:Securify",
+    "krypton.tbsafetychecker:TB_Checker",
+    "me.garfieldhan.holmes:Holmes",
+    "com.byxiaorun.detector:Ruru",
+    "com.kimchangyoun.rootbeerFresh.sample:Root_Beer",
+    "com.dergoogler.mmrl.wx:WebUI_X",
+    "com.dergoogler.mmrl:MMRL"
+  ];
+
+  let installedPackages = (await safeRun("pm list packages")).split("\n").map(l=>l.replace("package:","").trim());
+  let userApps = (await safeRun("pm list packages -3")).split("\n").map(l=>l.replace("package:","").trim());
+
+  // Risky apps
+  for(const entry of riskyApps){
+    const [pkg,name] = entry.split(":");
+    if(installedPackages.includes(pkg)){
+      addBubble(name,pkg,"RISKY");
+    }
+  }
+
+  // User apps
+  for(const pkg of userApps){
+    try{
+      const version = (await safeRun(`dumpsys package ${pkg} | grep -m1 versionName`)).trim();
+      if(version.toLowerCase().includes("spoofed")){
+        addBubble(pkg,pkg,"SPOOFED");
+      }
+    } catch{}
+    await new Promise(r=>setTimeout(r,50)); // small delay for UI responsiveness
+  }
+
+  if(outputLog.children.length===0)
+    addBubble("No risky/spoofed apps","-","SAFE");
+
+  showToast("Scan complete");
+}
+
+runBtn.addEventListener("click",detectApps);
+clearBtn.addEventListener("click",()=>{
+  outputLog.innerHTML="";
+  showToast("Log cleared");
+});
+</script>
+
+</body>
+</html>
