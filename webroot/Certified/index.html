@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>App Data Cleaner</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+<style>
+:root {
+  --bg: #2a2e41cc;
+  --fg: #e6e6e6;
+  --accent: #1592FF;
+  --panel-bg: #2a2e41cc;
+  --btn-hover: #2a2e41cc;
+  --border-color: #ffffff14;
+  --card-bg: #2a2e41e6;
+  --card-border: #ffffff0D;
+  --shadow-color: rgba(0,0,0,0.5);
+  --transition-speed: 0.3s;
+  --border-radius: 16px;
+  --glow-color: #1592FF;
+  --mona: #e6e6e6;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.container {
+  width: 420px;
+  max-width: 90%;
+  background: var(--panel-bg);
+  border-radius: var(--border-radius);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  box-shadow: 0 18px 48px var(--shadow-color);
+  text-align: center;
+  transform: scale(0.75);
+  transform-origin: top center;
+}
+
+.header { display: flex; justify-content: center; align-items: center; }
+.title { font-weight: 800; font-size: 1.4rem; letter-spacing: 0.2px; color: var(--fg); }
+
+.note { font-size: 1rem; color: var(--fg); line-height: 1.4; }
+
+.actions { display: flex; justify-content: center; gap: 16px; }
+
+.btn {
+  position: relative;
+  width: 100%;
+  height: 100px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  color: var(--fg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 6px 20px var(--shadow-color);
+  transition: transform var(--transition-speed), box-shadow var(--transition-speed), background var(--transition-speed);
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 50% 50%, var(--glow-color) 0%, transparent 70%);
+  filter: blur(8px);
+  opacity: 0.2;
+  transform: scale(1.05);
+  animation: softPulse 6s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.btn .icon {
+  position: absolute;
+  inset: 0;
+  font-size: 7rem;
+  color: var(--accent);
+  opacity: 0.25;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.btn span:not(.icon) { position: relative; z-index: 2; }
+
+.spinner {
+  display: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #aaa;
+  border-top-color: var(--fg);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin-left: auto;
+}
+
+.footer-note { font-size: 0.75rem; color: var(--mona); text-align: center; }
+
+.webui-popup {
+  position: fixed;
+  top: -70px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+  z-index: 99999;
+  transition: top 0.36s, opacity 0.36s;
+  opacity: 0;
+}
+
+@keyframes softPulse { 0%,100% { opacity:0.2; transform:scale(1.05); } 50% { opacity:0.35; transform:scale(1.1); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="container" role="region" aria-label="App Data Cleaner">
+  <div class="header">
+    <div class="title">FIX Device Not Certified</div>
+  </div>
+
+  <div class="note">⚠️ This action will clear app data for Google Play Store and Play Services. You’ll need to sign in to your Google account again afterward.</div>
+
+  <div class="actions">
+    <button id="clearBtn" class="btn" data-script="vending" onclick="ksu.exec('su -c pm clear com.android.vending; su -c pm clear com.google.android.gms')">
+      <span class="icon material-symbols-outlined">delete_forever</span>
+      Clear App Data
+      <div id="spinner" class="spinner" aria-hidden="true"></div>
+    </button>
+  </div>
+
+  <div class="footer-note">IntegrityBox &copy; 2025 - Use responsibly</div>
+</div>
+
+<script>
+const btn = document.getElementById('clearBtn');
+const spinner = document.getElementById('spinner');
+const MODDIR = `/data/adb/modules/playintegrity/webroot/common_scripts`;
+
+function popup(msg,type="info"){
+  const n=document.createElement("div");
+  n.className="webui-popup";
+  n.textContent=msg;
+  const colors={error:"#f44336",success:"#4caf50",info:"#1565c0",warn:"#ff8f00"};
+  const bg=colors[type]||"#0099FF";
+  Object.assign(n.style,{background:bg,color:"#fff"});
+  document.body.appendChild(n);
+  requestAnimationFrame(()=>{ n.style.top="20px"; n.style.opacity="1"; });
+  setTimeout(()=>{ n.style.top="-70px"; n.style.opacity="0"; setTimeout(()=>n.remove(),420); },2500);
+}
+
+async function runShell(cmd){
+  if(!cmd||typeof ksu?.exec!=="function") throw new Error("KSU API unavailable");
+  return new Promise((res,rej)=>{
+    const cb=`cb_${Date.now()}_${Math.random()*10000|0}`;
+    window[cb]=(code,stdout,stderr)=>{delete window[cb]; code===0?res((stdout||"").replace(/\r/g,"")):rej(new Error(stderr||stdout||"Shell failed"));};
+    ksu.exec(cmd,"{}",cb);
+  });
+}
+
+btn.addEventListener("click", async () => {
+  btn.disabled = true;
+  spinner.style.display = 'inline-block';
+  popup('Done ✅', 'success');
+  try { await runShell(`sh ${MODDIR}/vending`); } catch (e) {}
+  finally { spinner.style.display = 'none'; btn.disabled = false; }
+});
+</script>
+</body>
+</html>
