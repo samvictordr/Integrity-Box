@@ -1,3 +1,26 @@
+# 🚀 Quick Start
+
+**New to Integrity Box?** Get started quickly:
+
+1. 📖 **[Installation Guide](INSTALLATION.md)** - Complete installation instructions
+2. 🎯 **[Usage Guide](USAGE.md)** - Learn how to use the module and WebUI
+3. ⚡ **[Quick Reference](QUICK_REFERENCE.md)** - Commands and tips cheat sheet
+4. 💬 **[Support](https://t.me/MeowDump)** - Join our Telegram group for help
+
+## What is Integrity Box?
+
+Integrity Box is a powerful Magisk/KernelSU module that helps Android devices pass Google Play Integrity checks. It provides free, legitimate keyboxes and advanced spoofing features without requiring payment or leaked credentials.
+
+### Key Features
+✅ Pass Play Integrity (Basic, Device & Strong)  
+✅ Free valid keyboxes - no hidden charges  
+✅ Powerful WebUI for easy configuration  
+✅ Automatic updates and maintenance  
+✅ Multi-language support  
+✅ Compatible with banking and payment apps  
+
+---
+
 <details>
 <summary><strong>Notes</strong></summary>
 
