@@ -4,7 +4,8 @@
 
 1. 📖 **[Installation Guide](INSTALLATION.md)** - Complete installation instructions
 2. 🎯 **[Usage Guide](USAGE.md)** - Learn how to use the module and WebUI
-3. 💬 **[Support](https://t.me/MeowDump)** - Join our Telegram group for help
+3. ⚡ **[Quick Reference](QUICK_REFERENCE.md)** - Commands and tips cheat sheet
+4. 💬 **[Support](https://t.me/MeowDump)** - Join our Telegram group for help
 
 ## What is Integrity Box?
 
